@@ -8,18 +8,18 @@ import java.util.Map;
 
 public class CountConsumerInterceptor implements ConsumerInterceptor<String, Customer> {
 
-     String inputtopic;
-
+   public static String inputtopic;
     CountMeasure measure;
     Gauge gauge1;
 
+    static {
+        inputtopic = System.getenv("TOPIC");
+    }
 
     public CountConsumerInterceptor() {
-        inputtopic = System.getenv("TOPIC");
-
         measure = new CountMeasure(0.0);
-        gauge1 = Gauge.builder(inputtopic, measure, CountMeasure::getCount)
-                .tag(inputtopic, "totalevents")
+        gauge1 = Gauge.builder(inputtopic + "i", measure, CountMeasure::getCount)
+                //.tag(inputtopic, "totalevents")
                 .register(PrometheusUtils.prometheusRegistry);
     }
 
@@ -33,15 +33,15 @@ public class CountConsumerInterceptor implements ConsumerInterceptor<String, Cus
     public void onCommit(Map<TopicPartition, OffsetAndMetadata> map) {
     }
 
+
     @Override
     public void close() {
 
     }
 
+
     @Override
     public void configure(Map<String, ?> map) {
 
     }
-
-
 }

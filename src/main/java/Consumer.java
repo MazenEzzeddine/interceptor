@@ -72,7 +72,7 @@ public class Consumer {
 
                     for (TopicPartition tp : tps) {
                       double percenttopic2 = records.records(tp).size()* 0.8; /**0.7*/;
-                        double currentEventIndex = 0;
+                       double currentEventIndex = 0;
                         for (ConsumerRecord<String, Customer> record : records.records(tp)) {
                             totalEvents++;
                             if (System.currentTimeMillis() - record.timestamp() <= 5000) {
@@ -85,14 +85,14 @@ public class Consumer {
                                 Thread.sleep(Long.parseLong(config.getSleep()));
                                 // PrometheusUtils.latencygaugemeasure.setDuration(System.currentTimeMillis() - record.timestamp());
 
-                              if (currentEventIndex < percenttopic2) {
+                             if (currentEventIndex < percenttopic2) {
 
                                   producer.send(new ProducerRecord<String, Customer>("testtopic2",
                                           tp.partition(), record.timestamp(), record.key(), record.value()));
 
 
-                                }
-                                currentEventIndex++;
+                             }
+                               currentEventIndex++;
 
                             } catch (InterruptedException e) {
                                 e.printStackTrace();
