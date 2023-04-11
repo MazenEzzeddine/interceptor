@@ -19,8 +19,8 @@ public class CounterInterceptor implements ProducerInterceptor<String,Customer> 
         if(gauge == null) {
             CountMeasure measure = new CountMeasure(0.0);
             //Gauge gauge1 = Gauge.builder(topicto,  measure, CountMeasure::getCount).tag("topic to", topicto).register(PrometheusUtils.prometheusRegistry);
-            Gauge gauge1 = Gauge.builder(topicto,  measure, CountMeasure::getCount)
-                    .tag("topicFrom", CountConsumerInterceptor.inputtopic)
+            Gauge gauge1 = Gauge.builder(CountConsumerInterceptor.inputtopic+topicto,  measure, CountMeasure::getCount)
+                    //.tag("topicFrom", CountConsumerInterceptor.inputtopic + "i")
                     .register(PrometheusUtils.prometheusRegistry);
 
             topicToGauge.put(topicto, gauge1);

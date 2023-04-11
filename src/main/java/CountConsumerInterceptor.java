@@ -10,7 +10,7 @@ public class CountConsumerInterceptor implements ConsumerInterceptor<String, Cus
 
    public static String inputtopic;
     CountMeasure measure;
-    Gauge gauge1;
+    public static Gauge gauge1;
 
     static {
         inputtopic = System.getenv("TOPIC");
@@ -18,8 +18,8 @@ public class CountConsumerInterceptor implements ConsumerInterceptor<String, Cus
 
     public CountConsumerInterceptor() {
         measure = new CountMeasure(0.0);
-        gauge1 = Gauge.builder(inputtopic + "i", measure, CountMeasure::getCount)
-                //.tag(inputtopic, "totalevents")
+        gauge1 = Gauge.builder(inputtopic + "Total", measure, CountMeasure::getCount)
+               // .tag("topicTo", "NA")
                 .register(PrometheusUtils.prometheusRegistry);
     }
 

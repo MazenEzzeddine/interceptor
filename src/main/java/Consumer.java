@@ -71,7 +71,7 @@ public class Consumer {
                 if (records.count() != 0) {
 
                     for (TopicPartition tp : tps) {
-                      double percenttopic2 = records.records(tp).size()* 0.8; /**0.7*/;
+                      double percenttopic2 = records.records(tp).size()* 0.5;// *0.7;
                        double currentEventIndex = 0;
                         for (ConsumerRecord<String, Customer> record : records.records(tp)) {
                             totalEvents++;
@@ -89,9 +89,14 @@ public class Consumer {
 
                                   producer.send(new ProducerRecord<String, Customer>("testtopic2",
                                           tp.partition(), record.timestamp(), record.key(), record.value()));
+                             }else {
 
+                                 producer.send(new ProducerRecord<String, Customer>("testtopic3",
+                                         tp.partition(), record.timestamp(), record.key(), record.value()));
 
                              }
+
+
                                currentEventIndex++;
 
                             } catch (InterruptedException e) {
