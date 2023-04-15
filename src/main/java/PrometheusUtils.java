@@ -1,5 +1,6 @@
 import com.sun.net.httpserver.HttpServer;
 import io.micrometer.core.instrument.Gauge;
+import io.micrometer.core.instrument.Timer;
 import io.micrometer.prometheus.PrometheusConfig;
 import io.micrometer.prometheus.PrometheusMeterRegistry;
 
@@ -11,6 +12,7 @@ public class PrometheusUtils {
     public static PrometheusMeterRegistry prometheusRegistry;
     public static TimeMeasure latencygaugemeasure;
     public static Gauge latencygauge;
+    public static Timer timer;
 
 
     public static void initPrometheus() {
@@ -46,6 +48,14 @@ public class PrometheusUtils {
 
         //latencygauge = Gauge.builder("latencygauge",  latencygaugemeasure, TimeMeasure::getDuration).tag("child", "testtopic1").register(prometheusRegistry);
         //prometheusRegistry.gauge("timergauge" );
+
+         timer = Timer
+                .builder("event.time")
+                .description("a description of what this timer does")
+                .publishPercentiles(0.9, 0.95, 0.99)
+                .publishPercentileHistogram()
+                .tags("maz", "ezz")
+                .register(prometheusRegistry);
 
 
     }
