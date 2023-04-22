@@ -36,11 +36,14 @@ public class KafkaConsumerConfig {
         String sleep = System.getenv("SLEEP");
 
         String groupId = System.getenv("GROUP_ID");
-        String clientRack = System.getenv("CLIENT_RACK") == null ? null : System.getenv("CLIENT_RACK");
+        String clientRack = System.getenv("CLIENT_RACK") == null ? null
+                : System.getenv("CLIENT_RACK");
         Long messageCount = System.getenv("MESSAGE_COUNT") == null
-                ? DEFAULT_MESSAGES_COUNT : Long.valueOf(System.getenv("MESSAGE_COUNT"));
+                ? DEFAULT_MESSAGES_COUNT :
+                Long.valueOf(System.getenv("MESSAGE_COUNT"));
 
-        String additionalConfig = System.getenv().getOrDefault("ADDITIONAL_CONFIG", "");
+        String additionalConfig = System.getenv()
+                .getOrDefault("ADDITIONAL_CONFIG", "");
 
         return new KafkaConsumerConfig(bootstrapServers, topic, groupId, clientRack,
                 messageCount, sleep, additionalConfig);
@@ -60,7 +63,8 @@ public class KafkaConsumerConfig {
         props.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, config.getEnableAutoCommit());
         props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG,
                 "org.apache.kafka.common.serialization.StringDeserializer");
-        props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, CustomerDeserializer.class.getName());
+        props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG,
+                CustomerDeserializer.class.getName());
        // props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG,
         // "org.apache.kafka.common.serialization.StringDeserializer");
         if (!config.getAdditionalConfig().isEmpty()) {

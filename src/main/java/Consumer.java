@@ -13,13 +13,16 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Properties;
 
+import org.apache.commons.math3.distribution.NormalDistribution;
+
+
 public class Consumer {
 
     private static final Logger log = LogManager.getLogger(Consumer.class);
+    public static KafkaConsumer<String, Customer> consumer = null;
     static double eventsViolating = 0;
     static double eventsNonViolating = 0;
     static double totalEvents = 0;
-    public static KafkaConsumer<String, Customer> consumer = null;
     static float maxConsumptionRatePerConsumer = 0.0f;
     static float ConsumptionRatePerConsumerInThisPoll = 0.0f;
     static float averageRatePerConsumerForGrpc = 0.0f;
@@ -28,23 +31,28 @@ public class Consumer {
    static  ArrayList<TopicPartition> tps;
     static KafkaProducer<String, Customer> producer;
 
-    public Consumer() throws IOException, URISyntaxException, InterruptedException {
+    static NormalDistribution dist = new NormalDistribution(0.5, 0.1);
+
+    public Consumer() throws
+            IOException, URISyntaxException, InterruptedException {
     }
 
 
-
-
-
-    public static void main(String[] args) throws IOException, URISyntaxException, InterruptedException {
+    public static void main(String[] args)
+            throws IOException, URISyntaxException, InterruptedException {
         PrometheusUtils.initPrometheus();
         producer = Producer.producerFactory();
         KafkaConsumerConfig config = KafkaConsumerConfig.fromEnv();
         log.info(KafkaConsumerConfig.class.getName() + ": {}", config.toString());
         Properties props = KafkaConsumerConfig.createProperties(config);
-        // props.put(ConsumerConfig.PARTITION_ASSIGNMENT_STRATEGY_CONFIG, BinPackPartitionAssignor.class.getName());
-        //props.put(ConsumerConfig.PARTITION_ASSIGNMENT_STRATEGY_CONFIG, CooperativeStickyAssignor.class.getName());
-        props.put(ConsumerConfig.PARTITION_ASSIGNMENT_STRATEGY_CONFIG, StickyAssignor.class.getName());
-        //props.put(ConsumerConfig.PARTITION_ASSIGNMENT_STRATEGY_CONFIG, LagBasedPartitionAssignor.class.getName());
+        // props.put(ConsumerConfig.PARTITION_ASSIGNMENT_STRATEGY_CONFIG,
+        // BinPackPartitionAssignor.class.getName());
+        //props.put(ConsumerConfig.PARTITION_ASSIGNMENT_STRATEGY_CONFIG,
+        // CooperativeStickyAssignor.class.getName());
+        props.put(ConsumerConfig.PARTITION_ASSIGNMENT_STRATEGY_CONFIG,
+                StickyAssignor.class.getName());
+        //props.put(ConsumerConfig.PARTITION_ASSIGNMENT_STRATEGY_CONFIG,
+        // LagBasedPartitionAssignor.class.getName());
       /*  props.put(ConsumerConfig.PARTITION_ASSIGNMENT_STRATEGY_CONFIG,
                 org.apache.kafka.clients.consumer.RangeAssignor.class.getName());*/
         boolean commit = !Boolean.parseBoolean(config.getEnableAutoCommit());
@@ -52,27 +60,26 @@ public class Consumer {
         consumer.subscribe(Collections.singletonList(config.getTopic())/*, new RebalanceListener()*/);
         log.info("Subscribed to topic {}", config.getTopic());
 
-
-
         addShutDownHook();
-
-
         tps = new ArrayList<>();
-        tps.add(new TopicPartition("testtopic4", 0));
-        tps.add(new TopicPartition("testtopic4", 1));
-        tps.add(new TopicPartition("testtopic4", 2));
-        tps.add(new TopicPartition("testtopic4", 3));
-        tps.add(new TopicPartition("testtopic4", 4));
+        tps.add(new TopicPartition("testtopic1", 0));
+        tps.add(new TopicPartition("testtopic1", 1));
+        tps.add(new TopicPartition("testtopic1", 2));
+        tps.add(new TopicPartition("testtopic1", 3));
+        tps.add(new TopicPartition("testtopic1", 4));
 
         try {
             while (true) {
                 Long timeBeforePolling = System.currentTimeMillis();
-                ConsumerRecords<String, Customer> records = consumer.poll(Duration.ofMillis(Long.MAX_VALUE));
-                if (records.count() != 0) {
+                ConsumerRecords<String, Customer> records = consumer.poll
+                        (Duration.ofMillis(Long.MAX_VALUE));
+                double fraction = dist.sample();
+                PrometheusUtils.latencySample.setDuration(fraction);
 
+                if (records.count() != 0) {
                     for (TopicPartition tp : tps) {
-                    /*  double percenttopic2 = records.records(tp).size()* 0.5;// *0.7;
-                       double currentEventIndex = 0;*/
+                      double percenttopic2 = records.records(tp).size()* fraction; //0.5;// *0.7;
+                       double currentEventIndex = 0;
                         for (ConsumerRecord<String, Customer> record : records.records(tp)) {
                             totalEvents++;
                             if (System.currentTimeMillis() - record.timestamp() <= 5000) {
@@ -83,29 +90,25 @@ public class Consumer {
                             //TODO sleep per record or per batch
                             try {
                                 Thread.sleep(Long.parseLong(config.getSleep()));
-                                PrometheusUtils.latencygaugemeasure.setDuration(System.currentTimeMillis() - record.timestamp());
-                                PrometheusUtils.timer.record(Duration.ofMillis(System.currentTimeMillis() - record.timestamp()));
-
-
-                           /*  if (currentEventIndex < percenttopic2) {
-
-                                  producer.send(new ProducerRecord<String, Customer>("testtopic2",
-                                          tp.partition(), record.timestamp(), record.key(), record.value()));
+                                PrometheusUtils.latencygaugemeasure
+                                        .setDuration(System.currentTimeMillis() - record.timestamp());
+                                PrometheusUtils.timer.record
+                                        (Duration.ofMillis(System.currentTimeMillis() - record.timestamp()));
+                             if (currentEventIndex < percenttopic2) {
+                                  producer.send(new ProducerRecord<String, Customer>
+                                          ("testtopic2",
+                                          tp.partition(), record.timestamp(),
+                                                  record.key(), record.value()));
                              }else {
-
-                                 producer.send(new ProducerRecord<String, Customer>("testtopic3",
-                                         tp.partition(), record.timestamp(), record.key(), record.value()));
-
+                                 producer.send(new ProducerRecord<String, Customer>
+                                         ("testtopic3",
+                                         tp.partition(), record.timestamp(),
+                                                 record.key(), record.value()));
                              }
-
-
-
-
-                               currentEventIndex++;*/
+                               currentEventIndex++;
 
                              /*   producer.send(new ProducerRecord<String, Customer>("testtopic4",
                                         tp.partition(), record.timestamp(), record.key(), record.value()));*/
-
                             } catch (InterruptedException e) {
                                 e.printStackTrace();
                             }
@@ -121,12 +124,14 @@ public class Consumer {
                             (float) (timeAfterPollingProcessingAndCommit - timeBeforePolling)) * 1000.0f;
                     pollsSoFar += 1;
                     averageRatePerConsumerForGrpc = averageRatePerConsumerForGrpc +
-                            (ConsumptionRatePerConsumerInThisPoll - averageRatePerConsumerForGrpc) / (float) (pollsSoFar);
+                            (ConsumptionRatePerConsumerInThisPoll -
+                                    averageRatePerConsumerForGrpc) / (float) (pollsSoFar);
 
                     if (maxConsumptionRatePerConsumer < ConsumptionRatePerConsumerInThisPoll) {
                         maxConsumptionRatePerConsumer = ConsumptionRatePerConsumerInThisPoll;
                     }
-                    log.info("ConsumptionRatePerConsumerInThisPoll in this poll {}", ConsumptionRatePerConsumerInThisPoll);
+                    log.info("ConsumptionRatePerConsumerInThisPoll in this poll {}",
+                            ConsumptionRatePerConsumerInThisPoll);
                     log.info("maxConsumptionRatePerConsumer {}", maxConsumptionRatePerConsumer);
                     double percentViolating = (double) eventsViolating / (double) totalEvents;
                     double percentNonViolating = (double) eventsNonViolating / (double) totalEvents;

@@ -13,6 +13,9 @@ public class PrometheusUtils {
     public static TimeMeasure latencygaugemeasure;
     public static Gauge latencygauge;
     public static Timer timer;
+    public static TimeMeasure latencySample;
+    public static Gauge latencySampleGauge;
+
 
 
     public static void initPrometheus() {
@@ -31,22 +34,16 @@ public class PrometheusUtils {
             throw new RuntimeException(e);
         }
 
-
-
-
-
-
-
-
-
-
-
-
+        latencySample = new TimeMeasure(0.0);
+        latencySampleGauge = Gauge.builder("sample",  latencySample, TimeMeasure::getDuration)
+                .register(prometheusRegistry);//prometheusRegistry.gauge("timergauge" );
 
         latencygaugemeasure = new TimeMeasure(0.0);
-        latencygauge = Gauge.builder("latencygauge",  latencygaugemeasure, TimeMeasure::getDuration).register(prometheusRegistry);//prometheusRegistry.gauge("timergauge" );
+        latencygauge = Gauge.builder("latencygauge",  latencygaugemeasure, TimeMeasure::getDuration)
+                .register(prometheusRegistry);//prometheusRegistry.gauge("timergauge" );
 
-        //latencygauge = Gauge.builder("latencygauge",  latencygaugemeasure, TimeMeasure::getDuration).tag("child", "testtopic1").register(prometheusRegistry);
+        //latencygauge = Gauge.builder("latencygauge",  latencygaugemeasure, TimeMeasure::getDuration)
+        // .tag("child", "testtopic1").register(prometheusRegistry);
         //prometheusRegistry.gauge("timergauge" );
 
          timer = Timer
@@ -56,8 +53,6 @@ public class PrometheusUtils {
                 .publishPercentileHistogram()
                 .tags("maz", "ezz")
                 .register(prometheusRegistry);
-
-
     }
 
 }
