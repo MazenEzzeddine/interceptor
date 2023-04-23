@@ -9,8 +9,10 @@ import java.util.Map;
 public class CounterInterceptor implements
         ProducerInterceptor<String,Customer> {
 
-    Map<String, Gauge> topicToGauge = new HashMap<>();
-    Map<String, CountMeasure> topicToMeasure = new HashMap<>();
+    public static Map<String, Gauge> topicToGauge = new HashMap<>();
+    public static Map<String, CountMeasure> topicToMeasure = new HashMap<>();
+    public static Map<String, Double> topicToCount = new HashMap<>();
+
 
     @Override
     public ProducerRecord<String, Customer> onSend
@@ -26,10 +28,9 @@ public class CounterInterceptor implements
 
             topicToGauge.put(topicto, gauge1);
             topicToMeasure.put(topicto, measure);
-
+            topicToCount.put(topicto, 0.0);
         }else {
-            topicToMeasure.get(topicto).setCount(
-                    topicToMeasure.get(topicto).getCount() + 1.0);
+            topicToCount.put(topicto,topicToCount.get(topicto)+ 1);
         }
         return producerRecord;
     }

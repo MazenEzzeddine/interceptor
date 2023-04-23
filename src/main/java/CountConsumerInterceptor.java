@@ -10,7 +10,7 @@ public class CountConsumerInterceptor implements
         ConsumerInterceptor<String, Customer> {
 
    public static String inputtopic;
-    CountMeasure measure;
+    public static CountMeasure measure;
     public static Gauge gauge1;
 
     static {
@@ -28,7 +28,15 @@ public class CountConsumerInterceptor implements
     @Override
     public ConsumerRecords<String, Customer> onConsume
             (ConsumerRecords<String, Customer> consumerRecords) {
-        measure.setCount(measure.getCount() + consumerRecords.count());
+
+       for (Map.Entry<String, Double> e: CounterInterceptor.topicToCount.entrySet()) {
+           CounterInterceptor.topicToMeasure.get(e.getKey()).setCount(e.getValue()/ measure.getCount());
+       }
+        measure.setCount(consumerRecords.count());
+
+        for (Map.Entry<String, Double> e: CounterInterceptor.topicToCount.entrySet()) {
+            CounterInterceptor.topicToCount.put(e.getKey(),0.0);
+        }
         return consumerRecords;
     }
 

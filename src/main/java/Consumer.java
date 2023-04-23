@@ -31,7 +31,7 @@ public class Consumer {
    static  ArrayList<TopicPartition> tps;
     static KafkaProducer<String, Customer> producer;
 
-    static NormalDistribution dist = new NormalDistribution(0.5, 0.1);
+    static NormalDistribution dist = new NormalDistribution(0.25, 0.025);
 
     public Consumer() throws
             IOException, URISyntaxException, InterruptedException {
