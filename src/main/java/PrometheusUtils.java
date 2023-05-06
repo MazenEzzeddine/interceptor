@@ -42,9 +42,7 @@ public class PrometheusUtils {
         latencygauge = Gauge.builder("latencygauge",  latencygaugemeasure, TimeMeasure::getDuration)
                 .register(prometheusRegistry);//prometheusRegistry.gauge("timergauge" );
 
-        //latencygauge = Gauge.builder("latencygauge",  latencygaugemeasure, TimeMeasure::getDuration)
-        // .tag("child", "testtopic1").register(prometheusRegistry);
-        //prometheusRegistry.gauge("timergauge" );
+
 
          timer = Timer
                 .builder("event.time")
