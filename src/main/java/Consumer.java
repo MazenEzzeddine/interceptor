@@ -72,16 +72,16 @@ public class Consumer {
                 Long timeBeforePolling = System.currentTimeMillis();
                 ConsumerRecords<String, Customer> records = consumer.poll
                         (Duration.ofMillis(Long.MAX_VALUE));
-                double fraction = dist.sample();
+                double fraction = 1.0; //dist.sample();
                 PrometheusUtils.latencySample.setDuration(fraction);
 
                 if (records.count() != 0) {
                     for (TopicPartition tp : tps) {
-                        double percenttopic2 = records.records(tp).size() * fraction; //0.5;// *0.7;
+                        double percenttopic2 = records.records(tp).size() /** 0.5*/; /*fraction; //0.5;// *0.7;*/
                         double currentEventIndex = 0;
                         for (ConsumerRecord<String, Customer> record : records.records(tp)) {
                             totalEvents++;
-                            if (System.currentTimeMillis() - record.timestamp() <= 5000) {
+                            if (System.currentTimeMillis() - record.timestamp() <= 500) {
                                 eventsNonViolating++;
                             } else {
                                 eventsViolating++;
@@ -91,32 +91,28 @@ public class Consumer {
                                 Thread.sleep(Long.parseLong(config.getSleep()));
                                 PrometheusUtils.latencygaugemeasure
                                         .setDuration(System.currentTimeMillis() - record.timestamp());
-                                PrometheusUtils.timer.record
-                                        (Duration.ofMillis(System.currentTimeMillis() - record.timestamp()));
                                 if (currentEventIndex < percenttopic2) {
                                     producer.send(new ProducerRecord<String, Customer>
                                             ("testtopic2",
                                                     tp.partition(), record.timestamp(),
                                                     record.key(), record.value()));
-                                } else {
+                                } /*else {
                                     producer.send(new ProducerRecord<String, Customer>
                                             ("testtopic3",
                                                     tp.partition(), record.timestamp(),
                                                     record.key(), record.value()));
-                                }
+                                }*/
                                 currentEventIndex++;
 
-                             /*   producer.send(new ProducerRecord<String, Customer>("testtopic4",
-                                        tp.partition(), record.timestamp(), record.key(), record.value()));*/
                             } catch (InterruptedException e) {
                                 e.printStackTrace();
                             }
                         }
                     }
 
-                    /*                    if (commit) {*/
+
                     consumer.commitSync();
-                    /*                    }*/
+
                     log.info("In this poll, received {} events", records.count());
                     Long timeAfterPollingProcessingAndCommit = System.currentTimeMillis();
                     ConsumptionRatePerConsumerInThisPoll = ((float) records.count() /
