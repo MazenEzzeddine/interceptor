@@ -6,11 +6,12 @@ import org.apache.kafka.common.TopicPartition;
 
 import java.util.Map;
 
-public class CountConsumerInterceptor implements ConsumerInterceptor<String, Customer> {
+public class CountConsumerInterceptor implements
+        ConsumerInterceptor<String, Customer> {
 
    public static String inputtopic;
-    CountMeasure measure;
-    Gauge gauge1;
+    public static CountMeasure measure;
+    public static Gauge gauge1;
 
     static {
         inputtopic = System.getenv("TOPIC");
@@ -18,14 +19,24 @@ public class CountConsumerInterceptor implements ConsumerInterceptor<String, Cus
 
     public CountConsumerInterceptor() {
         measure = new CountMeasure(0.0);
-        gauge1 = Gauge.builder(inputtopic + "i", measure, CountMeasure::getCount)
-                //.tag(inputtopic, "totalevents")
+        gauge1 = Gauge.builder(inputtopic + "Total", measure,
+                        CountMeasure::getCount)
+               // .tag("topicTo", "NA")
                 .register(PrometheusUtils.prometheusRegistry);
     }
 
     @Override
-    public ConsumerRecords<String, Customer> onConsume(ConsumerRecords<String, Customer> consumerRecords) {
-        measure.setCount(measure.getCount() + consumerRecords.count());
+    public ConsumerRecords<String, Customer> onConsume
+            (ConsumerRecords<String, Customer> consumerRecords) {
+
+       for (Map.Entry<String, Double> e: CounterInterceptor.topicToCount.entrySet()) {
+           CounterInterceptor.topicToMeasure.get(e.getKey()).setCount(e.getValue()/ measure.getCount());
+       }
+        measure.setCount(consumerRecords.count());
+
+        for (Map.Entry<String, Double> e: CounterInterceptor.topicToCount.entrySet()) {
+            CounterInterceptor.topicToCount.put(e.getKey(),0.0);
+        }
         return consumerRecords;
     }
 
@@ -33,13 +44,10 @@ public class CountConsumerInterceptor implements ConsumerInterceptor<String, Cus
     public void onCommit(Map<TopicPartition, OffsetAndMetadata> map) {
     }
 
-
     @Override
     public void close() {
 
     }
-
-
     @Override
     public void configure(Map<String, ?> map) {
 
