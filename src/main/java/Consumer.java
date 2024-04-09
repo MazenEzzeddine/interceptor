@@ -61,23 +61,23 @@ public class Consumer {
 
         addShutDownHook();
         tps = new ArrayList<>();
-        tps.add(new TopicPartition("testtopic1", 0));
-        tps.add(new TopicPartition("testtopic1", 1));
-        tps.add(new TopicPartition("testtopic1", 2));
-        tps.add(new TopicPartition("testtopic1", 3));
-        tps.add(new TopicPartition("testtopic1", 4));
+        tps.add(new TopicPartition("testtopic3", 0));
+        tps.add(new TopicPartition("testtopic3", 1));
+        tps.add(new TopicPartition("testtopic3", 2));
+        tps.add(new TopicPartition("testtopic3", 3));
+        tps.add(new TopicPartition("testtopic3", 4));
 
         try {
             while (true) {
                 Long timeBeforePolling = System.currentTimeMillis();
                 ConsumerRecords<String, Customer> records = consumer.poll
                         (Duration.ofMillis(Long.MAX_VALUE));
-                double fraction = 1.0; //dist.sample();
+                double fraction = dist.sample();//1.0; //dist.sample();
                 PrometheusUtils.latencySample.setDuration(fraction);
 
                 if (records.count() != 0) {
                     for (TopicPartition tp : tps) {
-                        double percenttopic2 = records.records(tp).size() /** 0.5*/; /*fraction; //0.5;// *0.7;*/
+                        double percenttopic2 = records.records(tp).size(); //*fraction; //0.5; /** 0.5*/; /*fraction; //0.5;// *0.7;*/
                         double currentEventIndex = 0;
                         for (ConsumerRecord<String, Customer> record : records.records(tp)) {
                             totalEvents++;
@@ -91,12 +91,16 @@ public class Consumer {
                                 Thread.sleep(Long.parseLong(config.getSleep()));
                                 PrometheusUtils.latencygaugemeasure
                                         .setDuration(System.currentTimeMillis() - record.timestamp());
+
+                                log.info(" latency is {}", System.currentTimeMillis() - record.timestamp());
+
+/*
                                 if (currentEventIndex < percenttopic2) {
                                     producer.send(new ProducerRecord<String, Customer>
-                                            ("testtopic2",
+                                            ("testtopic3",
                                                     tp.partition(), record.timestamp(),
                                                     record.key(), record.value()));
-                                } /*else {
+                                }*/ /*else {
                                     producer.send(new ProducerRecord<String, Customer>
                                             ("testtopic3",
                                                     tp.partition(), record.timestamp(),

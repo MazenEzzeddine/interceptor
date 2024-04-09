@@ -32,11 +32,11 @@ public class CountConsumerInterceptor implements
        for (Map.Entry<String, Double> e: CounterInterceptor.topicToCount.entrySet()) {
            CounterInterceptor.topicToMeasure.get(e.getKey()).setCount(e.getValue()/ measure.getCount());
        }
-        measure.setCount(consumerRecords.count());
+        measure.setCount(consumerRecords.count() + measure.getCount()); // + existing
 
-        for (Map.Entry<String, Double> e: CounterInterceptor.topicToCount.entrySet()) {
+      /*  for (Map.Entry<String, Double> e: CounterInterceptor.topicToCount.entrySet()) {
             CounterInterceptor.topicToCount.put(e.getKey(),0.0);
-        }
+        }*/
         return consumerRecords;
     }
 
