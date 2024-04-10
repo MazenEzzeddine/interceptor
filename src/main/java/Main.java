@@ -15,8 +15,8 @@ import java.util.Collections;
 import java.util.Properties;
 
 
-public class Consumer {
-    private static final Logger log = LogManager.getLogger(Consumer.class);
+public class Main {
+    private static final Logger log = LogManager.getLogger(Main.class);
     public static KafkaConsumer<String, Customer> consumer = null;
     static double eventsViolating = 0;
     static double eventsNonViolating = 0;
@@ -26,33 +26,42 @@ public class Consumer {
     static float averageRatePerConsumerForGrpc = 0.0f;
     static long pollsSoFar = 0;
 
+    static Double maxConsumptionRatePerConsumer1 = 0.0d;
+
+
     static ArrayList<TopicPartition> tps;
     static KafkaProducer<String, Customer> producer;
 
     static NormalDistribution dist = new NormalDistribution(0.25, 0.025);
 
-    public Consumer() throws
+    public Main() throws
             IOException, URISyntaxException, InterruptedException {
     }
 
 
     public static void main(String[] args)
             throws IOException, URISyntaxException, InterruptedException {
+
+        Thread.sleep(5000);
+
         PrometheusUtils.initPrometheus();
         producer = Producer.producerFactory();
         KafkaConsumerConfig config = KafkaConsumerConfig.fromEnv();
         log.info(KafkaConsumerConfig.class.getName() + ": {}", config.toString());
         Properties props = KafkaConsumerConfig.createProperties(config);
-        // props.put(ConsumerConfig.PARTITION_ASSIGNMENT_STRATEGY_CONFIG,
-        // BinPackPartitionAssignor.class.getName());
+        props.put(ConsumerConfig.PARTITION_ASSIGNMENT_STRATEGY_CONFIG,
+         BinPackPartitionAssignor.class.getName());
         //props.put(ConsumerConfig.PARTITION_ASSIGNMENT_STRATEGY_CONFIG,
         // CooperativeStickyAssignor.class.getName());
         //props.put(ConsumerConfig.PARTITION_ASSIGNMENT_STRATEGY_CONFIG,
         // LagBasedPartitionAssignor.class.getName());
       /*  props.put(ConsumerConfig.PARTITION_ASSIGNMENT_STRATEGY_CONFIG,
                 org.apache.kafka.clients.consumer.RangeAssignor.class.getName());*/
-        props.put(ConsumerConfig.PARTITION_ASSIGNMENT_STRATEGY_CONFIG,
-                StickyAssignor.class.getName());
+     /*   props.put(ConsumerConfig.PARTITION_ASSIGNMENT_STRATEGY_CONFIG,
+                StickyAssignor.class.getName());*/
+
+/*        props.put(ConsumerConfig.PARTITION_ASSIGNMENT_STRATEGY_CONFIG,
+                BinPackPartitionAssignor.class.getName());*/
 
         boolean commit = !Boolean.parseBoolean(config.getEnableAutoCommit());
         consumer = new KafkaConsumer<String, Customer>(props);
@@ -60,12 +69,13 @@ public class Consumer {
         log.info("Subscribed to topic {}", config.getTopic());
 
         addShutDownHook();
+
         tps = new ArrayList<>();
-        tps.add(new TopicPartition("testtopic3", 0));
-        tps.add(new TopicPartition("testtopic3", 1));
-        tps.add(new TopicPartition("testtopic3", 2));
-        tps.add(new TopicPartition("testtopic3", 3));
-        tps.add(new TopicPartition("testtopic3", 4));
+        tps.add(new TopicPartition("testtopic1", 0));
+        tps.add(new TopicPartition("testtopic1", 1));
+        tps.add(new TopicPartition("testtopic1", 2));
+        tps.add(new TopicPartition("testtopic1", 3));
+        tps.add(new TopicPartition("testtopic1", 4));
 
         try {
             while (true) {
@@ -94,13 +104,12 @@ public class Consumer {
 
                                 log.info(" latency is {}", System.currentTimeMillis() - record.timestamp());
 
-/*
                                 if (currentEventIndex < percenttopic2) {
                                     producer.send(new ProducerRecord<String, Customer>
-                                            ("testtopic3",
+                                            ("testtopic2",
                                                     tp.partition(), record.timestamp(),
                                                     record.key(), record.value()));
-                                }*/ /*else {
+                                } /*else {
                                     producer.send(new ProducerRecord<String, Customer>
                                             ("testtopic3",
                                                     tp.partition(), record.timestamp(),
