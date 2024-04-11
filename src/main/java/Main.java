@@ -97,6 +97,7 @@ public class Main {
                                 eventsViolating++;
                             }
                             //TODO sleep per record or per batch
+                            //TODO externalize brqnching fqctor
                             try {
                                 Thread.sleep(Long.parseLong(config.getSleep()));
                                 PrometheusUtils.latencygaugemeasure
