@@ -25,6 +25,9 @@ public class CountConsumerInterceptor implements
                 .register(PrometheusUtils.prometheusRegistry);
     }
 
+
+    //TODO : maybe we should zeros both sent and consumed at each on consume
+
     @Override
     public ConsumerRecords<String, Customer> onConsume
             (ConsumerRecords<String, Customer> consumerRecords) {
