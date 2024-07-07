@@ -49,16 +49,16 @@ public class Main {
         KafkaConsumerConfig config = KafkaConsumerConfig.fromEnv();
         log.info(KafkaConsumerConfig.class.getName() + ": {}", config.toString());
         Properties props = KafkaConsumerConfig.createProperties(config);
-        props.put(ConsumerConfig.PARTITION_ASSIGNMENT_STRATEGY_CONFIG,
-         BinPackPartitionAssignor.class.getName());
+  /*      props.put(ConsumerConfig.PARTITION_ASSIGNMENT_STRATEGY_CONFIG,
+         BinPackPartitionAssignor.class.getName());*/
         //props.put(ConsumerConfig.PARTITION_ASSIGNMENT_STRATEGY_CONFIG,
         // CooperativeStickyAssignor.class.getName());
         //props.put(ConsumerConfig.PARTITION_ASSIGNMENT_STRATEGY_CONFIG,
         // LagBasedPartitionAssignor.class.getName());
       /*  props.put(ConsumerConfig.PARTITION_ASSIGNMENT_STRATEGY_CONFIG,
                 org.apache.kafka.clients.consumer.RangeAssignor.class.getName());*/
-     /*   props.put(ConsumerConfig.PARTITION_ASSIGNMENT_STRATEGY_CONFIG,
-                StickyAssignor.class.getName());*/
+        props.put(ConsumerConfig.PARTITION_ASSIGNMENT_STRATEGY_CONFIG,
+                StickyAssignor.class.getName());
 
 /*        props.put(ConsumerConfig.PARTITION_ASSIGNMENT_STRATEGY_CONFIG,
                 BinPackPartitionAssignor.class.getName());*/
@@ -87,7 +87,7 @@ public class Main {
 
                 if (records.count() != 0) {
                     for (TopicPartition tp : tps) {
-                        double percenttopic2 = records.records(tp).size(); //*fraction; //0.5; /** 0.5*/; /*fraction; //0.5;// *0.7;*/
+                        double percenttopic2 = records.records(tp).size()*0.9; //*fraction; //0.5; /** 0.5*/; /*fraction; //0.5;// *0.7;*/
                         double currentEventIndex = 0;
                         for (ConsumerRecord<String, Customer> record : records.records(tp)) {
                             totalEvents++;

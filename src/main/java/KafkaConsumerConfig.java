@@ -65,6 +65,10 @@ public class KafkaConsumerConfig {
                 "org.apache.kafka.common.serialization.StringDeserializer");
         props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG,
                 CustomerDeserializer.class.getName());
+
+
+        props.put(ConsumerConfig.MAX_POLL_RECORDS_CONFIG,
+                100);
        // props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG,
         // "org.apache.kafka.common.serialization.StringDeserializer");
         if (!config.getAdditionalConfig().isEmpty()) {
