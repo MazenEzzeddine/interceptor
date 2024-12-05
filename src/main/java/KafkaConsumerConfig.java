@@ -57,14 +57,18 @@ public class KafkaConsumerConfig {
             props.put(ConsumerConfig.CLIENT_RACK_CONFIG, config.getClientRack());
         }
         props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, config.getAutoOffsetReset());
-        props.put(ConsumerConfig.INTERCEPTOR_CLASSES_CONFIG,
-                Collections.singletonList(CountConsumerInterceptor.class));
+/*        props.put(ConsumerConfig.INTERCEPTOR_CLASSES_CONFIG,
+                Collections.singletonList(CountConsumerInterceptor.class));*/
 
         props.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, config.getEnableAutoCommit());
         props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG,
                 "org.apache.kafka.common.serialization.StringDeserializer");
         props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG,
                 CustomerDeserializer.class.getName());
+
+
+        props.put(ConsumerConfig.MAX_POLL_RECORDS_CONFIG,
+                100);
        // props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG,
         // "org.apache.kafka.common.serialization.StringDeserializer");
         if (!config.getAdditionalConfig().isEmpty()) {

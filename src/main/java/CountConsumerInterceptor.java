@@ -25,18 +25,19 @@ public class CountConsumerInterceptor implements
                 .register(PrometheusUtils.prometheusRegistry);
     }
 
+
+    //TODO : maybe we should zeros both sent and consumed at each on consume
+
     @Override
     public ConsumerRecords<String, Customer> onConsume
             (ConsumerRecords<String, Customer> consumerRecords) {
 
-       for (Map.Entry<String, Double> e: CounterInterceptor.topicToCount.entrySet()) {
-           CounterInterceptor.topicToMeasure.get(e.getKey()).setCount(e.getValue()/ measure.getCount());
-       }
-        measure.setCount(consumerRecords.count());
+     /*  for (Map.Entry<String, Double> e: CounterInterceptor.topicToCount.entrySet()) {
+           CounterInterceptor.topicToMeasure.get(e.getKey()).setCount(e.getValue()/measure.getCount());
+       }*/
+        measure.setCount(consumerRecords.count() + measure.getCount());
 
-        for (Map.Entry<String, Double> e: CounterInterceptor.topicToCount.entrySet()) {
-            CounterInterceptor.topicToCount.put(e.getKey(),0.0);
-        }
+
         return consumerRecords;
     }
 
