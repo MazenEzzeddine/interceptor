@@ -1,3 +1,4 @@
+import io.micrometer.core.instrument.DistributionSummary;
 import io.micrometer.core.instrument.Gauge;
 import org.apache.kafka.clients.producer.ProducerInterceptor;
 import org.apache.kafka.clients.producer.ProducerRecord;
@@ -9,29 +10,21 @@ import java.util.Map;
 public class CounterInterceptor implements
         ProducerInterceptor<String,Customer> {
 
-    public static Map<String, Gauge> topicToGauge = new HashMap<>();
-    public static Map<String, CountMeasure> topicToMeasure = new HashMap<>();
-    public static Map<String, Double> topicToCount = new HashMap<>();
-
-
+    public static Map<String, DistributionSummary> topicToDist= new HashMap<>();
     @Override
     public ProducerRecord<String, Customer> onSend
             (ProducerRecord<String, Customer> producerRecord) {
         String topicto = producerRecord.topic();
-        Gauge gauge=  topicToGauge.get(topicto);
-        if(gauge == null) {
-            CountMeasure measure = new CountMeasure(0.0);
-            Gauge gauge1 = Gauge.builder(CountConsumerInterceptor.inputtopic+topicto,
-                            measure, CountMeasure::getCount)
-                    //.tag("topicFrom", CountConsumerInterceptor.inputtopic + "i")
-                    .register(PrometheusUtils.prometheusRegistry);
 
-            topicToGauge.put(topicto, gauge1);
-            topicToMeasure.put(topicto, measure);
-            topicToCount.put(topicto, 0.0);
-        }else {
-            topicToCount.put(topicto,topicToCount.get(topicto)+ 1);
+        DistributionSummary dist  =  topicToDist.get(topicto);
+
+        if(dist == null) {
+            DistributionSummary dist1 = DistributionSummary.builder(System.getenv("TOPIC") + topicto)
+                    .register(PrometheusUtils.prometheusRegistry);
+            topicToDist.put(topicto, dist1);
         }
+        dist.record(1.0);
+
         return producerRecord;
     }
 
