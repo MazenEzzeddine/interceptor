@@ -71,7 +71,7 @@ public class Main {
                // double fraction = dist.sample();//1.0; //dist.sample();
                 if (records.count() != 0) {
                     for (TopicPartition tp : tps) {
-                        double percenttopic2 = records.records(tp).size()*1.0;//* 0.7; //*fraction; //0.5; /** 0.5*/; /*fraction; //0.5;// *0.7;*/
+                        double percenttopic2 = records.records(tp).size()*1.0 ; //0.75;//1.0;//* 0.7; //*fraction; //0.5; /** 0.5*/; /*fraction; //0.5;// *0.7;*/
                         double currentEventIndex = 0;
                         for (ConsumerRecord<String, Customer> record : records.records(tp)) {
                             totalEvents++;
@@ -90,12 +90,14 @@ public class Main {
 
                                 log.info(" latency is {}", System.currentTimeMillis() - record.timestamp());
 
-                                if (currentEventIndex < percenttopic2) {
+                            /*    if (currentEventIndex < percenttopic2) {
                                     producer.send(new ProducerRecord<String, Customer>
                                             ("testtopic3",
                                                     tp.partition(), record.timestamp(),
                                                     record.key(), record.value()));
-                                }
+                                }*/
+
+
 
 
 

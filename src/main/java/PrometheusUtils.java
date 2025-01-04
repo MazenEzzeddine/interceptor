@@ -39,7 +39,8 @@ public class PrometheusUtils {
         latencygauge = Gauge.builder("latencygauge", latencygaugemeasure, TimeMeasure::getDuration)
                 .register(prometheusRegistry);
 
-        distributionSummary = DistributionSummary.builder("events_latency_" +  System.getenv("TOPIC")).register(prometheusRegistry);
+        distributionSummary = DistributionSummary.builder("events_latency_" +  System.getenv("TOPIC"))
+                .register(prometheusRegistry);
 
     }
 }

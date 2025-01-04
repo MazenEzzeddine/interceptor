@@ -17,17 +17,15 @@ public class Producer {
     static KafkaProducer<String, Customer> producer;
     static Random rnd;
     static long key;
-    static int eventsPerSeconds;
 
-    public  static KafkaProducer<String, Customer> producerFactory() throws InterruptedException, IOException, URISyntaxException {
+    public  static KafkaProducer<String, Customer> producerFactory() throws
+            InterruptedException, IOException, URISyntaxException {
         rnd = new Random();
         config = KafkaProducerConfig.fromEnv();
         log.info(KafkaProducerConfig.class.getName() + ": {}", config.toString());
         Properties props = KafkaProducerConfig.createProperties(config);
-        int delay = config.getDelay();
         producer = new KafkaProducer<String, Customer>(props);
 
-        AtomicLong numSent = new AtomicLong(0);
         // over all the workload
         key = 0L;
 
